@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API</title>
+  <style>
+      .container {
+          max-width: 1040px;
+          margin: 0 auto;
+      }
+      h1 {
+          width: 100%;
+          text-align: center;
+      }
+      h2 {
+          font-weight: 600;
+      }
+      input {
+          height: 25px;
+          font-size: 18px;
+      }
+      button {
+          width: fit-content;
+          padding: 0 15px;
+          height: 40px;
+          border-radius: 5px;
+          border: 1px solid gray;
+          background: #5e5e5e;
+          color: white;
+          font-size: 18px;
+      }
+      button:hover {
+          cursor: pointer;
+          background: #919191;
+      }
+      pre {
+          display: none;
+          padding: 5px;
+          border: 1px solid gray;
+          font-size: 18px;
+          background: #e1e1e1;
+          border-radius: 5px;
+      }
+      .pre-input {
+          display: block;
+      }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>JSON API</h1>
+    <p>
+      <h2><i>GET:</i> /api/cards</h2>
+      <button class="get-cards-btn" data-action="get-cards">Get cards</button>
+      <pre class="get-cards-code-container"><code data-code="get-cards"></code></pre>
+    </p>
+    <p>
+      <h2><i>POST:</i> /api/cards</h2>
+      <p>
+        <pre contenteditable class="pre-input">
+          <code data-input="create-card">
+            {
+              "name": "Name",
+              "description": "Description",
+              "damage": 5,
+              "health": 10
+            }
+          </code>
+        </pre>
+      </p>
+      <button data-action="post-card">Post card</button>
+      <pre class="create-card-code-container"><code data-code="create-card"></code></pre>
+    </p>
+    <p>
+      <h2><i>DELETE:</i> /api/cards/:id</h2>
+      <p>
+        <input data-input="delete-card" placeholder="Card ID" />
+      </p>
+      <button data-action="delete-card">Delete card</button>
+      <pre class="delete-card-code-container"><code data-code="delete-card"></code></pre>
+    </p>
+  </div>
+  <script>
+    const $ = (selector) => document.querySelector(selector)
+    const setBlockStyle = (selector) => $(selector).style.display = 'block'
+    const setInnerHTML = (selector, data) => $(selector).innerHTML = JSON.stringify(data, null, 2)
+
+    $('[data-action="get-cards"]')
+      .addEventListener('click', () => {
+        fetch('http://localhost:8080/api/cards')
+          .then(res => res.json())
+          .then(res => {
+            setBlockStyle('.get-cards-code-container')
+            setInnerHTML('[data-code="get-cards"]', res.data)
+          })
+      })
+
+    $('[data-action="post-card"]')
+      .addEventListener('click', () => {
+        const string = JSON.stringify($('[data-input="create-card"]').textContent)
+          .replaceAll('\\n', '')
+          .replaceAll('\\', '')
+
+        const object = JSON.parse("" + string.slice(1, string.length-1))
+
+        fetch('http://localhost:8080/api/cards', {
+          method: 'POST',
+          headers: { "Content-Type": 'application/json' },
+          body: JSON.stringify(object)
+        })
+          .then(res=> res.json())
+          .then(res => {
+            setBlockStyle('.create-card-code-container')
+            setInnerHTML('[data-code="create-card"]', res)
+          })
+      })
+
+    $('[data-action="delete-card"]')
+      .addEventListener('click', () => {
+        fetch(`http://localhost:8080/api/cards/${$('[data-input="delete-card"]').value}`, { method: 'DELETE' })
+          .then(res => res.json())
+          .then(res => {
+            setBlockStyle('.delete-card-code-container')
+            setInnerHTML('[data-code="delete-card"]', res)
+          })
+      })
+  </script>
+</body>
+</html>
