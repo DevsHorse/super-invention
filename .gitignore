@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/db/cards.json
 
 # misc
 .DS_Store
